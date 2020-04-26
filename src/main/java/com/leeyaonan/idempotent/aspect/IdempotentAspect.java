@@ -1,23 +1,18 @@
 package com.leeyaonan.idempotent.aspect;
 
-
 import com.leeyaonan.idempotent.service.TokenService;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Method;
+import java.io.PrintWriter;
 
 /**
  * @author Rot
@@ -39,6 +34,7 @@ public class IdempotentAspect {
     public Object checkToken(ProceedingJoinPoint joinPoint) throws Throwable {
         // 获取请求头、请求参数，从中拿取Token
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
 
         try {
             boolean checkToken = tokenService.checkToken(request);
@@ -47,6 +43,14 @@ public class IdempotentAspect {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/html;charset=utf-8");
+
+            PrintWriter writer = response.getWriter();
+            writer.print(e.getMessage());
+            if (null != writer) {
+                writer.close();
+            }
         }
 
         return null;

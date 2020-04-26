@@ -51,7 +51,7 @@ public class TokenServiceImpl implements TokenService {
         if (StringUtils.isEmpty(token)) {
             token = request.getParameter(RedisConstant.TOKEN_NAME);
             if (StringUtils.isEmpty(token)) {
-                throw new Exception("参数异常");
+                throw new Exception("请求缺少Token");
             }
         }
 
@@ -62,7 +62,7 @@ public class TokenServiceImpl implements TokenService {
         boolean remove = redisUtils.remove(token);
 
         if (!remove) {
-            throw new Exception("重复操作");
+            throw new Exception("删除Token失败");
         }
 
         return true;
